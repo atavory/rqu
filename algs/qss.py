@@ -601,14 +601,12 @@ def run_qss_on_features(
     task_type: str,
     K: int,
     F_rq_train: np.ndarray | None = None,
-    dp_epsilon: float | None = None,
 ) -> float:
     """Run QSS evaluation on feature arrays.
 
     Args:
-        F_rq_train: Data to train RQ on. Defaults to F_pub (QSS-A).
-            Pass concat(F_pub, F_priv) for QSS-B/C/D.
-        dp_epsilon: If set, add Laplace noise to RQ codebook for epsilon-DP (QSS-D).
+        F_rq_train: Data to train RQ on. Defaults to F_pub (QSS-E).
+            Pass concat(F_pub, F_priv) for QSS-L.
     """
     F_pub_n = l2_normalize(F_pub)
     F_priv_n = l2_normalize(F_priv)
@@ -634,15 +632,6 @@ def run_qss_on_features(
     rq.train_type = faiss.ResidualQuantizer.Train_default
     rq.max_beam_size = 1
     rq.train(np.ascontiguousarray(F_rq_train_n, dtype=np.float32))
-
-    if dp_epsilon is not None:
-        N_train = F_rq_train_n.shape[0]
-        sensitivity = 2.0 / N_train
-        scale = sensitivity / dp_epsilon
-        codebook = faiss.vector_to_array(rq.codebooks).copy()
-        noise = np.random.laplace(0, scale, codebook.shape).astype(np.float32)
-        codebook += noise
-        faiss.copy_array_to_vector(codebook, rq.codebooks)
 
     priv_codes = encode_rq(rq, F_priv_n, b, ell)
     test_codes = encode_rq(rq, F_test_n, b, ell)

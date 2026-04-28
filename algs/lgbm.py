@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) Meta Platforms, Inc. and affiliates. All rights reserved.
+# (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
 
 """LightGBM-based QSS algorithms for tabular datasets.
 
